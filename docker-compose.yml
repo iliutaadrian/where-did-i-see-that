@@ -1,14 +1,27 @@
-version: '3.8'
-
 services:
-  web:
-    build: .
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
     ports:
       - "5017:5000"
     volumes:
-      - .:/app
-      - ./docs:/app/docs
       - ./data:/app/data
-    env_file:
-      - .env
-    command: python /app/src/app.py
+      - ./src:/app/src
+    environment:
+      - FLASK_APP=src/app.py
+      - FLASK_ENV=development

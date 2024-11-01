@@ -3,6 +3,7 @@ PyPDF2
 beautifulsoup4
 faiss-cpu
 flask
+flask-cors
 langchain
 langchain-community
 langchain-openai

@@ -48,16 +48,23 @@ const YoutubeSearch = () => {
         options: JSON.stringify(['caching'])
       });
 
-      const response = await fetch(`/search?${params}`);
-      const data = await response.json();
+      const response = await fetch(`http://localhost:5017/search?${params}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
 
       if (!response.ok) {
-        throw new Error(data.error || 'Search failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Search failed');
       }
 
+      const data = await response.json();
       setResults(data.search_results || []);
     } catch (err) {
-      setError(err.message);
+      console.error('Search error:', err);
+      setError(err instanceof Error ? err.message : 'Search failed');
       setResults([]);
     } finally {
       setLoading(false);
@@ -71,12 +78,12 @@ const YoutubeSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white">
+    <div className="min-h-screen text-white">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-4">
             <span className="text-white">You</span>
-            <span className="text-[#ff0000]">Tube</span>
+            <span className="text-red-600">Tube</span>
             <span className="text-white"> Search</span>
           </h1>
           <p className="text-gray-400 mb-6">Search using BM25 and OpenAI embeddings</p>
@@ -95,30 +102,30 @@ const YoutubeSearch = () => {
               className={`
                 rounded-l-full rounded-r-none
                 h-10 px-4 py-2
-                bg-[#121212] 
-                border-[#303030]
-                hover:border-[#3ea6ff]
-                focus:border-[#3ea6ff]
+                bg-neutral-900
+                border-neutral-700
+                hover:border-blue-400
+                focus:border-blue-400
                 focus:ring-1 
-                focus:ring-[#3ea6ff]
+                focus:ring-blue-400
                 text-white
                 placeholder-gray-400
                 transition-all
-                ${isFocused ? 'border-[#3ea6ff] ring-1 ring-[#3ea6ff]' : ''}
+                ${isFocused ? 'border-blue-400 ring-1 ring-blue-400' : ''}
               `}
             />
           </div>
-          <Button 
+          <Button
             onClick={handleSearch}
             disabled={loading || !query.trim()}
             className={`
               w-16 h-10
               rounded-r-full rounded-l-none
-              bg-[#222222]
-              hover:bg-[#303030]
+              bg-neutral-800
+              hover:bg-neutral-700
               border border-l-0
-              border-[#303030]
-              ${isFocused ? 'border-[#3ea6ff]' : ''}
+              border-neutral-700
+              ${isFocused ? 'border-blue-400' : ''}
               transition-all
             `}
           >
@@ -130,12 +137,12 @@ const YoutubeSearch = () => {
           </Button>
         </div>
 
-        <Tabs 
-          value={activeMethod} 
-          onValueChange={setActiveMethod} 
+        <Tabs
+          value={activeMethod}
+          onValueChange={setActiveMethod}
           className="mb-6"
         >
-          <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto bg-[#222222]">
+          <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto bg-neutral-800">
             {Object.entries({
               hybrid: 'Hybrid Search',
               bm25: 'BM25',
@@ -144,7 +151,7 @@ const YoutubeSearch = () => {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="data-[state=active]:bg-[#303030] data-[state=active]:text-[#3ea6ff]"
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-blue-400"
               >
                 {label}
               </TabsTrigger>
@@ -160,15 +167,15 @@ const YoutubeSearch = () => {
 
         <div className="space-y-4">
           {results.map((result, index) => (
-            <Card key={index} className="bg-[#222222] border-[#303030]">
+            <Card key={index} className="bg-neutral-800 border-neutral-700">
               <CardHeader>
-                <CardTitle 
-                  className="text-lg text-[#3ea6ff]"
+                <CardTitle
+                  className="text-lg text-blue-400"
                   dangerouslySetInnerHTML={{ __html: result.highlighted_name }}
                 />
               </CardHeader>
               <CardContent>
-                <div 
+                <div
                   className="text-gray-300"
                   dangerouslySetInnerHTML={{ __html: result.content_snippet }}
                 />

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
 from search import init_search_module
 from search.search_module import perform_search
@@ -13,44 +14,50 @@ import json
 from autocomplete import init_autocomplete, get_autocomplete_suggestions, update_click_count
 
 app = Flask(__name__)
+CORS(app)  # This enables CORS for all routes
 
 all_titles = []
 
 @app.route('/search', methods=['GET'])
 def search():
-    query = request.args.get('q', '')
-    aggregation_method = request.args.get('aggregationMethod', 'single')
-    syntactic_methods = json.loads(request.args.get('syntacticMethods', '[]'))
-    semantic_methods = json.loads(request.args.get('semanticMethods', '[]'))
-    options = json.loads(request.args.get('options', '[]'))
+    try:
+        query = request.args.get('q', '')
+        print(f"Received search query: {query}")
+        
+        aggregation_method = request.args.get('aggregationMethod', 'single')
+        print(f"Aggregation method: {aggregation_method}")
+        
+        syntactic_methods = json.loads(request.args.get('syntacticMethods', '[]'))
+        print(f"Syntactic methods: {syntactic_methods}")
+        
+        semantic_methods = json.loads(request.args.get('semanticMethods', '[]'))
+        print(f"Semantic methods: {semantic_methods}")
+        
+        options = json.loads(request.args.get('options', '[]'))
+        print(f"Options: {options}")
 
-    if not query:
-        return jsonify({"error": "No query provided"}), 400
+        if not query:
+            return jsonify({"error": "No query provided"}), 400
 
-    update_click_count(query)
+        print("Performing search...")
+        results = perform_search(query, aggregation_method, syntactic_methods, semantic_methods)
+        print(f"Search results: {results}")
+        
+        if results is None:
+            print("No results found")
+            return jsonify({
+                "search_results": [],
+                "error": "Search failed - no results found"
+            })
 
-    search_methods = syntactic_methods + semantic_methods
+        return jsonify({
+            "search_results": results[:10],
+            "total_results": len(results)
+        })
 
-    if 'caching' in options:
-        cached_results = get_results(query, aggregation_method, search_methods, options)
-        if cached_results:
-            return jsonify(cached_results)
-
-    results = perform_search(query, aggregation_method, syntactic_methods, semantic_methods)
-    
-    ai_response = None
-    if 'ai_assist' in options:
-        ai_response = generate_ai_response(query, results[:3])
-    
-    response = {
-        "search_results": results[:10],
-        "ai_response": ai_response.get('full_content', '') if ai_response else None
-    }
-
-    if 'caching' in options:
-        store_results(query, aggregation_method, search_methods, options, results, response.get('ai_response'))
-    
-    return jsonify(response)
+    except Exception as e:
+        print(f"Search error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/autocomplete', methods=['GET'])
 def autocomplete():
@@ -72,9 +79,20 @@ def update_click():
     return jsonify({"success": True, "message": "Click count updated"})
 
 if __name__ == '__main__':
-
-    print("\nInitializing documents", flush=True)
-    indexed_count, documents = init_processor()
+    documents = [
+        {
+            "path": "sample1.txt",
+            "name": "Sample Document 1",
+            "content": "This is a sample document for testing search functionality.",
+            "original_content": "This is a sample document for testing search functionality."
+        },
+        {
+            "path": "sample2.txt",
+            "name": "Sample Document 2",
+            "content": "Another sample document with different content.",
+            "original_content": "Another sample document with different content."
+        }
+    ]
 
     print("\nInitializing search module", flush=True)
     init_search_module(documents)
@@ -83,7 +101,7 @@ if __name__ == '__main__':
     init_cache_module()
 
     print("\nInitializing autocomplete module", flush=True)
-    init_autocomplete(documents, indexed_count)
+    init_autocomplete(documents, 0)
 
     print("\nInitializing LLM module", flush=True)
     init_llm()

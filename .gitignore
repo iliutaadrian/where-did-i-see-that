@@ -1,0 +1,6 @@
+data
+docs-gg
+documents.db
+__pycache__
+.git
+.env

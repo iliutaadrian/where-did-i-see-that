@@ -1,0 +1,1 @@
+http://localhost:5017/search?q=redis&aggregationMethod=rank_fusion&syntacticMethods=%5B%22bm25%22%5D&semanticMethods=%5B%22openai%22%5D&options=%5B%22autocomplete%22%2C%22ai_assist%22%2C%22caching%22%5D

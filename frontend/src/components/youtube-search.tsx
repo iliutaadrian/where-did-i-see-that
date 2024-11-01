@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from 'react';
 import { Search, Loader2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
-import { Button } from './components/ui/button';
-import { Input } from './components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
-import { Alert, AlertDescription } from './components/ui/alert';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const YoutubeSearch = () => {
   const [query, setQuery] = useState('');
@@ -80,15 +80,6 @@ const YoutubeSearch = () => {
   return (
     <div className="min-h-screen text-white">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">
-            <span className="text-white">You</span>
-            <span className="text-red-600">Tube</span>
-            <span className="text-white"> Search</span>
-          </h1>
-          <p className="text-gray-400 mb-6">Search using BM25 and OpenAI embeddings</p>
-        </div>
-
         <div className="flex gap-0 mb-6 max-w-2xl mx-auto">
           <div className={`flex-1 relative ${isFocused ? 'z-10' : ''}`}>
             <Input
